@@ -192,6 +192,7 @@ def generate_dynamic_train_data(args, type):
     else:
         G_files = 'dynamic-data/' + args.dataset + '/*.inp'
         files = glob.glob(G_files)
+        # print(files[-2:])
         G_list = read_dynamic_graph(args, files[-2:])
 
     subgraph_set = []

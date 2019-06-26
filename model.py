@@ -4,7 +4,7 @@
 
 '''
 import tensorflow as tf
-from modules import get_token_embeddings, ff, positional_encoding, multihead_attention, label_smoothing, noam_scheme, bivalue, get_diag
+from modules import get_token_embeddings, ff, positional_encoding, multihead_attention, noam_scheme, bivalue, biclass
 from utils import convert_idx_to_token_tensor
 from tqdm import tqdm
 import logging
@@ -150,21 +150,13 @@ class Transformer:
                                               scope="vanilla_attention")
                     ### Feed Forward
                     dec = ff(dec, num_units=[self.hp.d_ff, self.hp.d_model])
-
-        # Final linear projection (embedding weights are shared)
-        # dec = tf.layers.dense(inputs=dec, units=self.hp.d_model, activation=tf.nn.relu, trainable=True)
-        # logits = tf.layers.dense(inputs=dec, units=self.hp.d_model, activation=tf.nn.relu, trainable=True)
-        weights = tf.nn.embedding_lookup(self.embeddings, x) # (d_model, T2)
-        logits = tf.einsum('ntd,nkd->ntk', dec, weights) # (N, T2, T2)
-        logits = (logits + tf.transpose(logits, [0, 2, 1]))/2 #强制最终结果为一个对称矩阵，符合
-##########################################################################################需要修改输出的维度
-        # weights = tf.nn.embedding_lookup(self.embeddings, x)
-        # diag_a = 1/tf.sqrt(tf.reduce_sum(dec*dec, axis=-1))
-        # diag_b = 1/tf.sqrt(tf.reduce_sum(weights*weights, axis=-1))
-        # logits = tf.einsum('nij,njk,ni,nk->nik', dec, tf.transpose(weights, [0, 2, 1]), diag_a, diag_b)  # (N, T2, T2)
-        #用sigmod找出存在的边
-        # logits = tf.to_int32(tf.sigmoid(logits))
-        return logits, y, decoder_inputs, weights
+        if self.hp.type == 'attribute':
+            logits = tf.layers.dense(inputs=dec, units=1, activation=tf.nn.relu)
+        else:
+            weights = tf.nn.embedding_lookup(self.embeddings, x) # (d_model, T2)
+            logits = tf.einsum('ntd,nkd->ntk', dec, weights) # (N, T2, T2)
+            logits = (logits + tf.transpose(logits, [0, 2, 1]))/2 #强制最终结果为一个对称矩阵，符合
+        return logits, y, decoder_inputs
 
     def train(self, xs, ys):
         '''
@@ -176,7 +168,7 @@ class Transformer:
         '''
         # forward
         memory = self.encode(xs)
-        logits, y_, dec, weight = self.decode(xs, ys, memory)
+        logits, y_, dec = self.decode(xs, ys, memory)
 
         # train scheme
         #需要进行label smoothing么？？？？？？？？？？？
@@ -210,33 +202,12 @@ class Transformer:
         Returns
         y_hat: (N, T2)
         '''
-        #需要用到结构矩阵
-        decoder_inputs, y, y_seqlen = ys
-
-        # decoder_inputs = tf.ones((tf.shape(xs[0])[0], 1), tf.int32) * self.token2idx["<s>"]
-        # ys = (decoder_inputs, y, y_seqlen)
-
         memory = self.encode(xs, False)
-
-        logging.info("Inference graph is being built. Please be patient.")
-        # for _ in tqdm(range(self.hp.maxlen2)):
-        #     logits, y_hat, y = self.decode(ys, memory, False)
-        #     #需要去掉
-        #     # if tf.reduce_sum(y_hat, 1) == self.token2idx["<pad>"]: break
-        #
-        #     _decoder_inputs = tf.concat((decoder_inputs, y_hat), 1)
-        #     ys = (_decoder_inputs, y, y_seqlen)
-
-        # monitor a random sample
-        # n = tf.random_uniform((), 0, tf.shape(y_hat)[0]-1, tf.int32)
-        # sent1 = sents1[n]
-        # pred = convert_idx_to_token_tensor(y_hat[n], self.idx2token)
-
-        logits, y, dec, weight = self.decode(xs, ys, memory)
-        # print(logits)
-        # print(y)
-        exist_pre, no_exist_pre, all_pre= tf.py_func(bivalue, [logits, y, dec, weight], [tf.double, tf.double, tf.double], stateful=True)
-        summaries = tf.summary.merge_all()
-        #需要加上计算loss的过程，或者各种其他的东西
-        return exist_pre, no_exist_pre, all_pre, summaries
+        logits, y, dec = self.decode(xs, ys, memory)
+        if self.hp.type == 'attribute':
+            accuracy = tf.py_func(biclass, [logits, y, dec], [tf.double], stateful=True)
+            return accuracy
+        else:
+            exist_pre, no_exist_pre, all_pre = tf.py_func(bivalue, [logits, y, dec], [tf.double, tf.double, tf.double], stateful=True)
+            return exist_pre, no_exist_pre, all_pre
 

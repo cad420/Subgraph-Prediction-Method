@@ -54,8 +54,8 @@ class Hparams:
     parser.add_argument('--undirected', dest='undirected', action='store_false')
     parser.set_defaults(directed=False)
 
-    parser.add_argument('--dataset', default='ia-facebook-wall-wosn-dir', help='The name of dataset.')
-    parser.add_argument('--node_num', type=int, default=46952, help='The number of node.')
+    parser.add_argument('--dataset', default='tech-as-topology', help='The name of dataset.')
+    parser.add_argument('--node_num', type=int, default=34765, help='The number of node.')
 
     parser.add_argument('--max_graph_size', type=int, default=10, help='The max number of subgraph size.')
 
@@ -71,4 +71,4 @@ class Hparams:
 
     parser.add_argument('--timestep', type=int, default=3, help='How far to transfer.')
 
-    parser.add_argument('--type', default='dyna', help='The type of training')
+    parser.add_argument('--type', default='dynamic', help='The type of training')

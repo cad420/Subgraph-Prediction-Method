@@ -54,7 +54,7 @@ def spliter(subgraph_set, Go, Gn):
             # pro_vec = preprocessing.normalize(pro_vec, norm='l2')
             tem_out.append(pro_out)
         if cou/sub_size < 0.3:
-            # print(cou/sub_size)
+        #     # print(cou/sub_size)
             continue
         inpu.append(sub_set)
         pro.append(tem_pro)
@@ -163,6 +163,7 @@ def train_data(args, type):
             print("开始生成训练数据")
         else:
             print("开始生成测试数据")
+        # print(subgraph_set)
         sub = []
         pro = []
         output = []

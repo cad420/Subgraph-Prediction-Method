@@ -320,7 +320,7 @@ def noam_scheme(init_lr, global_step, warmup_steps=4000.):
     step = tf.cast(global_step + 1, dtype=tf.float32)
     return init_lr * warmup_steps ** 0.5 * tf.minimum(step * warmup_steps ** -1.5, step ** -0.5)
 
-def bivalue(logist, label, dec, weight):
+def bivalue(logist, label, dec):
     # print(dec.shape)
     # print(weight.shape)
     # print(logist.shape)
@@ -330,13 +330,7 @@ def bivalue(logist, label, dec, weight):
     # print(label)
     logist[logist > 0.5] = 1.0
     logist[logist <= 0.5] = 0
-    # for n in range(1):
-    #     print("第%d个logist"%n)
-    #     print(logist[n])
-    #     print("第%d个label"%n)
-    #     print(label[n])
-    # logist[logist > 0.5] = 1.0
-    # logist[logist <= 0.5] = 0
+
     exist_total = 0
     no_exist_total = 0
     exist_label = 0
@@ -358,6 +352,18 @@ def bivalue(logist, label, dec, weight):
     # print(true_label)
     # print(total)
     return exist_label/exist_total, no_exist_label/no_exist_total, (exist_label+no_exist_label)/(exist_total+no_exist_total)
+
+def biclass(logist, label):
+    logist[logist > 0.5] = 1.0
+    logist[logist <= 0.5] = 0
+    ans = 0
+    cnt = 0
+    for n in range(logist.shape[0]):
+        for i in range(logist[n].shape[0]):
+            if label[cnt] == logist[n][i]:
+                ans += 1
+            cnt += 1
+    return ans / cnt
 
 def get_diag(data, embedding):
     result = []
