@@ -12,7 +12,8 @@ def walker(args, sub_size_list, degree, G, node_list):
             continue
         for k in range(sub_size_list[i]):
             # 随机产生子图的大小
-            sub_node_num = random.randint(3, args.max_graph_size)
+            # sub_node_num = random.randint(3, args.max_graph_size)
+            sub_node_num = args.max_graph_size
             seta = 5 * sub_node_num
             tem_vis = [0 for j in range(args.node_num)]
             tem_node_set = set()

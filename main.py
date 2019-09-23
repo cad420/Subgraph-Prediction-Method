@@ -3,18 +3,19 @@
 import sys
 sys.path.append("/")
 import tensorflow as tf
-from model import Transformer
+from model import SENN
 from tqdm import tqdm
 from load_data import train_data
 from utils import save_hparams, save_variable_specs
 import os
 from hparams import Hparams
 import math
-import logging
+import time
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = "0"
 
 def main():
+    time_start = time.time()
     hparams = Hparams()
     parser = hparams.parser
     hp = parser.parse_args()
@@ -32,7 +33,7 @@ def main():
     train_init_op = iter.make_initializer(input_set)
     eval_init_op = iter.make_initializer(eval_input_set)
     print("构建模型")
-    m = Transformer(hp)
+    m = SENN(hp)
     loss, train_op, global_step, train_summaries = m.train(xs, ys)
     if hp.type == 'attribute':
         accuracy = m.eval(xs, ys)
@@ -60,6 +61,10 @@ def main():
                     print("综合预测准确率为：  ", al_pre)
                 print("Epoch : %02d   loss : %.2f" % (epoch, _loss))
                 sess.run(train_init_op)
-
+    time_end = time.time()
+    all_time = int(time_end - time_start)
+    hours = int(all_time / 3600)
+    minute = int((all_time - 3600 * hours) / 60)
+    print('totally cost  :  ', hours, 'h', minute, 'm', all_time - -hours * 3600 - 60 * minute)
 if __name__ == '__main__':
     main()

@@ -6,7 +6,6 @@ import os
 from sklearn import preprocessing
 import random
 import tensorflow as tf
-from modules import label_smoothing
 from scipy import sparse
 from multiprocessing import Pool
 
@@ -153,12 +152,13 @@ def generator_fn(input, pro, output):
 def train_data(args, type):
     if args.type == 'dynamic':
         graph_filename = 'dynamic-train/'+args.dataset+'_'+type+'.dat'
-        if not os.path.exists(graph_filename):
-            subgraph_set, G_list = generator.generate_dynamic_train_data(args, type)
-            pickle.dump([subgraph_set, G_list], open(graph_filename, 'wb'))
-        else:
-            print("已经存在数据，开始读取-----动态数据")
-            subgraph_set, G_list = pickle.load(open(graph_filename, 'rb'))
+        # if not os.path.exists(graph_filename):
+        #     subgraph_set, G_list = generator.generate_dynamic_train_data(args, type)
+        #     pickle.dump([subgraph_set, G_list], open(graph_filename, 'wb'))
+        # else:
+        #     print("已经存在数据，开始读取-----动态数据")
+        #     subgraph_set, G_list = pickle.load(open(graph_filename, 'rb'))
+        subgraph_set, G_list = generator.generate_dynamic_train_data(args, type)
         if type == 'train':
             print("开始生成训练数据")
         else:
@@ -204,6 +204,8 @@ def train_data(args, type):
         else:
             print("已经存在数据，开始读取-----静态数据")
             subgraph_set, G_list = pickle.load(open(graph_filename, 'rb'))
+        # subgraph_set, G_list = generator.generate_train_data(args, type)
+        # pickle.dump([subgraph_set, G_list], open(graph_filename, 'wb'))
         subset_size = len(subgraph_set)
         per_spliter_each = subset_size // args.spliter
         results = []

@@ -29,7 +29,7 @@ def test(x, y):
     # print(y[0])
     return x
 
-class Transformer:
+class SENN:
     '''
     xs: tuple of
         x: int32 tensor. (N, T1)
@@ -152,6 +152,7 @@ class Transformer:
                     dec = ff(dec, num_units=[self.hp.d_ff, self.hp.d_model])
         if self.hp.type == 'attribute':
             logits = tf.layers.dense(inputs=dec, units=1, activation=tf.nn.relu)
+            logits = tf.einsum('ij,jk->ik', logits, tf.einsum('ij->ji', logits))
         else:
             weights = tf.nn.embedding_lookup(self.embeddings, x) # (d_model, T2)
             logits = tf.einsum('ntd,nkd->ntk', dec, weights) # (N, T2, T2)
