@@ -6,12 +6,12 @@ import numpy as np
 from multiprocessing import Pool
 
 def walker(args, sub_size_list, degree, G, node_list):
+    ''''''
     subgraph_set = []
     for i in node_list:
         if degree[i] < 3:
             continue
         for k in range(sub_size_list[i]):
-            # 随机产生子图的大小
             # sub_node_num = random.randint(3, args.max_graph_size)
             sub_node_num = args.max_graph_size
             seta = 5 * sub_node_num
@@ -20,14 +20,18 @@ def walker(args, sub_size_list, degree, G, node_list):
             sub_node_set = []
             tem_node_set.add(i)
             tem_vis[i] = 1
-            # 限制子图大小
             # print(tem_node_set)
             while len(sub_node_set) < sub_node_num:
                 # print(sub_node_num)
-                choose_node = random.sample(tem_node_set, 1)
-                tem_node_set.remove(choose_node[0])
+                choose_node = [i]
+                if random.random()<0.1:
+                    while tem_vis[choose_node[0]]:
+                        choose_node = random.sample(node_list, 1)
+                    tem_vis[choose_node[0]] = 1
+                else:
+                    choose_node = random.sample(tem_node_set, 1)
+                    tem_node_set.remove(choose_node[0])
                 sub_node_set.append(choose_node[0])
-                # 限制筛选集合大小
                 if len(tem_node_set) < seta:
                     for j in G.neighbors(choose_node[0]):
                         if not tem_vis[j] and degree[j] >= 2:

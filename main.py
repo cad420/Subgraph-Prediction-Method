@@ -6,7 +6,6 @@ import tensorflow as tf
 from model import SENN
 from tqdm import tqdm
 from load_data import train_data
-from utils import save_hparams, save_variable_specs
 import os
 from hparams import Hparams
 import math
