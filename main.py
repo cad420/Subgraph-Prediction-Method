@@ -18,7 +18,6 @@ def main():
     hparams = Hparams()
     parser = hparams.parser
     hp = parser.parse_args()
-    save_hparams(hp, hp.logdir)
     print("开始读取数据")
     input_set,  results = train_data(hp, 'train')
     eval_input_set,  results_eval = train_data(hp, 'evaluation')
