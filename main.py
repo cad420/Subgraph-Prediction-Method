@@ -11,7 +11,7 @@ from hparams import Hparams
 import math
 import time
 
-# os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+#os.environ['CUDA_VISIBLE_DEVICES'] = "0"
 
 def main():
     time_start = time.time()

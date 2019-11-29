@@ -23,7 +23,7 @@ def func(tran, x, seqlen, d_model):
 
 def test(x, y):
     # print(1 / (1 + np.exp(-x[0])))
-    # print(y[0])
+    # print(y[0]
     return x
 
 class SENN:

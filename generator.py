@@ -67,7 +67,6 @@ def read_graph(args, G_o_file_name, G_n_file_name):
     G_n_file = open(G_n_file_name, 'r')
     G_o_file_num = 0
     G_n_file_num = 0
-
     for line in G_o_file:
         tem = line[:-1].split(' ')
         if len(tem) < 2:
